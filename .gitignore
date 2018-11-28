@@ -67,6 +67,8 @@ SymbolMatch/.vs
 ElfPatch/obj
 ElfPatchSimple/obj
 MonoPatch/obj
+MonoPatch/bin/dll
+MonoPatch/bin/*.dll
 hook/obj
 hook/libs
 inject/obj
