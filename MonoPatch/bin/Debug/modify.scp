@@ -1,0 +1,135 @@
+script(main)
+{
+	$files = getfilelist();
+	begin("开始脚本处理");
+	setchecktype("MemoryLog","CheckTypeForMemoryLog");
+	setcheckmethod("MemoryLog","CheckMethodForMemoryLog");
+	setchecktype("CallHook","CheckTypeForCallHook");
+	setcheckmethod("CallHook","CheckMethodForCallHook");
+	setchecktype("ReturnHook","CheckTypeForReturnHook");
+	setcheckmethod("ReturnHook","CheckMethodForReturnHook");
+	looplist($files){
+		$file=$$;
+		beginfile($file, "开始对"+$file+"进行修改。。。");
+		$path=getdirectoryname($file);
+		$assem = combinepath($path, "PluginFramework.dll");
+		dontinject($assem, "__Error");
+		dontinject($assem, "CsLibrary.Logger");
+		dontinject($assem, "CsLibrary.GameLogger");
+		dontinject($assem, "CsLibrary.QSLogger");
+		dontinject($assem, "Utility", "GfxLog");
+		inject($assem, "Utility", "MemoryLog");
+		inject($assem, "Utility", "CallHook");
+		inject($assem, "Utility", "ReturnHook");
+		endfile($file);
+	};
+	end("结束脚本处理");
+	return(0);
+};
+
+script(CheckTypeForMemoryLog)
+{
+	$ret=true;
+	$typeDef = arg(0);
+	$methodRef = arg(1);
+	$filename = getmodulefilename();
+	$name = getmodulename();
+	if($name=="PluginFramework.dll"){
+		$ret=false;
+		if($typeDef.Name=="ClientModule" || 
+			$typeDef.Name=="GfxStorySystem" || 
+			$typeDef.Name=="EntityInfo" || 
+			$typeDef.Name=="EntityViewModel" || 
+			$typeDef.Name=="AnimatorController" ||
+			$typeDef.Name.StartsWith("Move")){
+			$ret=true;
+		};
+		if($typeDef.FullName.StartsWith("PluginFramework")){
+			$ret=true;
+		};
+	}else{
+		$ret=true;
+		if($typeDef.FullName.StartsWith("TableConfig")){
+			$ret=false;
+		};
+		if($typeDef.Name=="GameControler" || $typeDef.Name=="Startup" || $typeDef.Name=="Program"){
+			$ret=false;
+		};
+	};
+	return($ret);
+};
+script(CheckMethodForMemoryLog)
+{
+	$ret=true;
+	$methodDef = arg(0);
+	$methodRef = arg(1);
+	if($methodDef.Name.EndsWith("ctor")){
+		$ret=false;
+	};
+	if($methodDef.Name.StartsWith("Regist")){
+		$ret=false;
+	};
+	return($ret);
+};
+
+script(CheckTypeForCallHook)
+{
+	$ret=true;
+	$typeDef = arg(0);
+	$methodRef = arg(1);
+	$filename = getmodulefilename();
+	$name = getmodulename();
+	if($name=="PluginFramework.dll"){
+		$ret=false;
+		if($typeDef.Name=="Utility"){
+			$ret=true;
+		};
+	};
+	return($ret);
+};
+script(CheckMethodForCallHook)
+{
+	$ret=true;
+	$methodDef = arg(0);
+	$methodRef = arg(1);
+	if($methodDef.Name.EndsWith("ctor")){
+		$ret=false;
+	}else{
+		$ret=false;
+		if($methodDef.Name=="SendScriptMessage" || $methodDef.Name=="SendMessage"){
+			$ret=true;
+		};
+	};
+	return($ret);
+};
+
+script(CheckTypeForReturnHook)
+{
+	$ret=true;
+	$typeDef = arg(0);
+	$methodRef = arg(1);
+	$filename = getmodulefilename();
+	$name = getmodulename();
+	if($name=="PluginFramework.dll"){
+		$ret=false;
+		if($typeDef.Name=="Utility"){
+			$ret=true;
+		};
+	};
+	return($ret);
+};
+script(CheckMethodForReturnHook)
+{
+	$ret=true;
+	$methodDef = arg(0);
+	$methodRef = arg(1);
+	if($methodDef.Name.EndsWith("ctor")){
+		$ret=false;
+	}else{
+		$ret=false;
+		if($methodDef.Name=="SendMessageWithTag"){
+			$ret=true;
+		};
+	};
+	return($ret);
+};

@@ -1,0 +1,14 @@
+proc(main)
+{
+	$files = getfilelist();
+	begin("开始脚本处理");
+	looplist($files){
+		$file=$$;
+		beginfile($file, 0x01000,"开始对"+$file+"进行修改。。。");
+		//adddllcall("/data/local/tmp/libMallocHook.so", "InstallHook", "1024");
+		adddllcall("libMallocHook.so", "InstallHook", "0");
+		addinitarraycall(0);
+		endfile($file);
+	};
+	end("结束脚本处理");
+};

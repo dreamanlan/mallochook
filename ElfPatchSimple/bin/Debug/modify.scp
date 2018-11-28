@@ -1,0 +1,12 @@
+proc(main)
+{
+	$files = getfilelist();
+	begin("开始脚本处理");
+	looplist($files){
+		$file=$$;
+		beginfile($file,"开始对"+$file+"进行修改。。。");
+		addinitarraycall(0);
+		endfile($file, 0x1000);
+	};
+	end("结束脚本处理");
+};
