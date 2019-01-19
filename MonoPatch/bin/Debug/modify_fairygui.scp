@@ -11,6 +11,8 @@ script(main)
 		$assem = combinepath($path, "FairyGUI.dll");
 		dontinject($assem, "FairyGUI.FairyUtility");
 		dontinject($assem, "FairyGUI.FairyMemoryStatistic");
+		treatasnew("System\\.String.*");
+		treatasnew("UnityEngine\\..*");
 		inject($assem, "FairyGUI.FairyUtility", "MemoryLog");
 		endfile($file);
 	};

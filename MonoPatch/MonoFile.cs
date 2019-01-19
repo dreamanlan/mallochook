@@ -394,8 +394,18 @@ namespace MonoPatch
                             return true;
                         } else if (null != methodDef && !methodDef.DeclaringType.IsValueType) {
                             return true;
-                        } else {
-                            return false;
+                        }
+                    } else if (il.OpCode == OpCodes.Call || il.OpCode == OpCodes.Calli || il.OpCode == OpCodes.Callvirt) {
+                        var methodRef = il.Operand as MethodReference;
+                        var methodDef = il.Operand as MethodDefinition;
+                        if (null != methodRef) {
+                            var fn = methodRef.FullName;
+                            if (ScriptProcessor.IsTreatAsNew(fn))
+                                return true;
+                        } else if (null != methodDef) {
+                            var fn = methodDef.FullName;
+                            if (ScriptProcessor.IsTreatAsNew(fn))
+                                return true;
                         }
                     }
                 }

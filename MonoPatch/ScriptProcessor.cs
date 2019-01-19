@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.IO;
 using System.Windows.Forms;
 using Calculator;
@@ -22,6 +23,10 @@ namespace MonoPatch
         {
             get { return s_DontInjectTypes; }
         }
+        public static List<Regex> TreatAsNew
+        {
+            get { return s_TreatAsNew; }
+        }
         public static List<string> ErrorTxts
         {
             get { return s_ErrorTxts; }
@@ -41,6 +46,7 @@ namespace MonoPatch
             s_Calculator.Register("getmodulefilename", new ExpressionFactoryHelper<GetModuleFileNameCommand>());
             s_Calculator.Register("getmodulename", new ExpressionFactoryHelper<GetModuleNameCommand>());
             s_Calculator.Register("dontinject", new ExpressionFactoryHelper<DontInjectCommand>());
+            s_Calculator.Register("treatasnew", new ExpressionFactoryHelper<TreatAsNewCommand>());
             s_Calculator.Register("beginfile", new ExpressionFactoryHelper<BeginFileCommand>());
             s_Calculator.Register("loadassembly", new ExpressionFactoryHelper<LoadAssemblyCommand>());
             s_Calculator.Register("loadtype", new ExpressionFactoryHelper<LoadTypeCommand>());
@@ -163,6 +169,15 @@ namespace MonoPatch
             }
             return true;
         }
+        public static bool IsTreatAsNew(string fullName)
+        {
+            foreach (var regex in s_TreatAsNew) {
+                if (regex.IsMatch(fullName)) {
+                    return true;
+                }
+            }
+            return false;
+        }
 
         private static DslCalculator s_Calculator = new DslCalculator();
         private static MonoFile s_CurFile = null;
@@ -172,6 +187,7 @@ namespace MonoPatch
         private static Dictionary<string, string> s_CheckMethodFuncs = new Dictionary<string, string>();
         private static HashSet<string> s_DontInjectMethods = new HashSet<string>();
         private static HashSet<string> s_DontInjectTypes = new HashSet<string>();
+        private static List<Regex> s_TreatAsNew = new List<Regex>();
         private static Dictionary<string, MonoFile> s_MonoFiles = new Dictionary<string, MonoFile>();
         private static List<string> s_FileList = new List<string>();
         private static string s_OutputPath = string.Empty;

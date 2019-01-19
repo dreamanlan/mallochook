@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
+using System.Text.RegularExpressions;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using MonoPatch;
@@ -209,6 +211,18 @@ namespace Calculator
                         ScriptProcessor.ErrorTxts.Add(string.Format("dontinject can't find type '{0}' from {1}", type, module));
                     }
                 }
+            }
+            return 0;
+        }
+    }
+    internal class TreatAsNewCommand : SimpleExpressionBase
+    {
+        protected override object OnCalc(IList<object> operands)
+        {
+            if (operands.Count > 0) {
+                string r = operands[0] as string;
+                var regex = new Regex(r, RegexOptions.Compiled);
+                ScriptProcessor.TreatAsNew.Add(regex);
             }
             return 0;
         }
