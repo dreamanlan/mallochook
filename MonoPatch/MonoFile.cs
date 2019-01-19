@@ -38,10 +38,12 @@ namespace MonoPatch
             if (null != methodRef) {
                 bool haveReturnValue = 0 != string.Compare(methodRef.ReturnType.FullName, "System.Void", true);
                 int paramCount = methodRef.Parameters.Count;
-                if (paramCount == 1) {
-                    InjectMemoryLog(methodRef, haveReturnValue);
-                } else if (paramCount == 2) {
-                    InjectCallHook(methodRef, haveReturnValue);
+                if (paramCount == 2) {
+                    if (methodRef.Parameters[0].ParameterType.FullName == "System.Int32") {
+                        InjectMemoryLog(methodRef, haveReturnValue);
+                    } else {
+                        InjectCallHook(methodRef, haveReturnValue);
+                    }
                 } else {
                     InjectReturnHook(methodRef, haveReturnValue);
                 }
@@ -78,7 +80,6 @@ namespace MonoPatch
                         var body = methodDef.Body;
                         if (HaveNew(methodDef)) {
                             string tag = CalcTag(methodDef);
-                            string tagOnRet = "ret:" + tag;
                             
                             var ilProcessor = body.GetILProcessor();
                             var insertPoint = body.Instructions[0];
@@ -87,6 +88,7 @@ namespace MonoPatch
                             } else {
                                 ilProcessor.InsertBefore(insertPoint, ilProcessor.Create(OpCodes.Nop));
                             }
+                            ilProcessor.InsertBefore(insertPoint, ilProcessor.Create(OpCodes.Ldc_I4_0));
                             ilProcessor.InsertBefore(insertPoint, ilProcessor.Create(OpCodes.Ldstr, tag));
                             ilProcessor.InsertBefore(insertPoint, ilProcessor.Create(OpCodes.Call, methodRef));
                             if (haveReturnValue) {
@@ -101,7 +103,8 @@ namespace MonoPatch
                                 ilProcessor.InsertAfter(insertPoint, newRet);
                                 insertPoint = newRet;
 
-                                ilProcessor.InsertBefore(insertPoint, ilProcessor.Create(OpCodes.Ldstr, tagOnRet));
+                                ilProcessor.InsertBefore(insertPoint, ilProcessor.Create(OpCodes.Ldc_I4_1));
+                                ilProcessor.InsertBefore(insertPoint, ilProcessor.Create(OpCodes.Ldstr, tag));
                                 ilProcessor.InsertBefore(insertPoint, ilProcessor.Create(OpCodes.Call, methodRef));
                                 if (haveReturnValue) {
                                     ilProcessor.InsertBefore(insertPoint, ilProcessor.Create(OpCodes.Pop));

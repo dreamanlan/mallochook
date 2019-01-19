@@ -296,7 +296,7 @@ namespace Calculator
                         bool handled = false;
                         foreach (var m in td.Methods) {
                             if (m.Name == method) {
-                                bool memoryLog = 1 == m.Parameters.Count && 0 == string.Compare(m.Parameters[0].ParameterType.FullName, "System.String", true);
+                                bool memoryLog = 2 == m.Parameters.Count && 0 == string.Compare(m.Parameters[0].ParameterType.FullName, "System.Int32", true) && 0 == string.Compare(m.Parameters[1].ParameterType.FullName, "System.String", true);
                                 bool callHook = 2 == m.Parameters.Count && 0 == string.Compare(m.Parameters[0].ParameterType.FullName, "System.String", true) && 0 == string.Compare(m.Parameters[1].ParameterType.FullName, "System.Object[]", true);
                                 bool returnHook = 3 == m.Parameters.Count && 0 == string.Compare(m.Parameters[0].ParameterType.FullName, "System.Object", true) && 0 == string.Compare(m.Parameters[1].ParameterType.FullName, "System.String", true) && 0 == string.Compare(m.Parameters[2].ParameterType.FullName, "System.Object[]", true);
                                 if (memoryLog || callHook || returnHook) {

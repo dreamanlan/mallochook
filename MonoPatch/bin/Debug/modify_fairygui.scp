@@ -1,0 +1,42 @@
+script(main)
+{
+	$files = getfilelist();
+	begin("开始脚本处理");
+	setchecktype("MemoryLog","CheckTypeForMemoryLog");
+	setcheckmethod("MemoryLog","CheckMethodForMemoryLog");
+	looplist($files){
+		$file=$$;
+		beginfile($file, "开始对"+$file+"进行修改。。。");
+		$path=getdirectoryname($file);
+		$assem = combinepath($path, "FairyGUI.dll");
+		dontinject($assem, "FairyGUI.FairyUtility");
+		dontinject($assem, "FairyGUI.FairyMemoryStatistic");
+		inject($assem, "FairyGUI.FairyUtility", "MemoryLog");
+		endfile($file);
+	};
+	end("结束脚本处理");
+	return(0);
+};
+
+script(CheckTypeForMemoryLog)
+{
+	$ret=true;
+	$typeDef = arg(0);
+	$methodRef = arg(1);
+	$filename = getmodulefilename();
+	$name = getmodulename();
+	if($typeDef.Name=="FairySimpleObjectPool"){
+		$ret=false;
+	};
+	return($ret);
+};
+script(CheckMethodForMemoryLog)
+{
+	$ret=true;
+	$methodDef = arg(0);
+	$methodRef = arg(1);
+	if($methodDef.Name.EndsWith("ctor")){
+		$ret=false;
+	};
+	return($ret);
+};
