@@ -215,6 +215,18 @@ namespace Calculator
             return 0;
         }
     }
+    internal class DontTreatAsNewCommand : SimpleExpressionBase
+    {
+        protected override object OnCalc(IList<object> operands)
+        {
+            if (operands.Count > 0) {
+                string r = operands[0] as string;
+                var regex = new Regex(r, RegexOptions.Compiled);
+                ScriptProcessor.DontTreatAsNew.Add(regex);
+            }
+            return 0;
+        }
+    }
     internal class TreatAsNewCommand : SimpleExpressionBase
     {
         protected override object OnCalc(IList<object> operands)

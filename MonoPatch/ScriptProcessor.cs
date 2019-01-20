@@ -23,6 +23,10 @@ namespace MonoPatch
         {
             get { return s_DontInjectTypes; }
         }
+        public static List<Regex> DontTreatAsNew
+        {
+            get { return s_DontTreatAsNew; }
+        }
         public static List<Regex> TreatAsNew
         {
             get { return s_TreatAsNew; }
@@ -46,6 +50,7 @@ namespace MonoPatch
             s_Calculator.Register("getmodulefilename", new ExpressionFactoryHelper<GetModuleFileNameCommand>());
             s_Calculator.Register("getmodulename", new ExpressionFactoryHelper<GetModuleNameCommand>());
             s_Calculator.Register("dontinject", new ExpressionFactoryHelper<DontInjectCommand>());
+            s_Calculator.Register("donttreatasnew", new ExpressionFactoryHelper<DontTreatAsNewCommand>());
             s_Calculator.Register("treatasnew", new ExpressionFactoryHelper<TreatAsNewCommand>());
             s_Calculator.Register("beginfile", new ExpressionFactoryHelper<BeginFileCommand>());
             s_Calculator.Register("loadassembly", new ExpressionFactoryHelper<LoadAssemblyCommand>());
@@ -171,6 +176,17 @@ namespace MonoPatch
         }
         public static bool IsTreatAsNew(string fullName)
         {
+            if (s_DontTreatAsNew.Count <= 0 && s_TreatAsNew.Count <= 0) {
+                return false;
+            }
+            foreach (var regex in s_DontTreatAsNew) {
+                if (regex.IsMatch(fullName)) {
+                    return false;
+                }
+            }
+            if (s_TreatAsNew.Count <= 0) {
+                return true;
+            }
             foreach (var regex in s_TreatAsNew) {
                 if (regex.IsMatch(fullName)) {
                     return true;
@@ -187,6 +203,7 @@ namespace MonoPatch
         private static Dictionary<string, string> s_CheckMethodFuncs = new Dictionary<string, string>();
         private static HashSet<string> s_DontInjectMethods = new HashSet<string>();
         private static HashSet<string> s_DontInjectTypes = new HashSet<string>();
+        private static List<Regex> s_DontTreatAsNew = new List<Regex>();
         private static List<Regex> s_TreatAsNew = new List<Regex>();
         private static Dictionary<string, MonoFile> s_MonoFiles = new Dictionary<string, MonoFile>();
         private static List<string> s_FileList = new List<string>();
