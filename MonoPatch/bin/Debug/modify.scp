@@ -18,9 +18,9 @@ script(main)
 		dontinject($assem, "CsLibrary.GameLogger");
 		dontinject($assem, "CsLibrary.QSLogger");
 		dontinject($assem, "Utility", "GfxLog");
-		inject($assem, "Utility", "MemoryLog");
-		inject($assem, "Utility", "CallHook");
-		inject($assem, "Utility", "ReturnHook");
+		inject($assem, "MemoryAndCallHook", "MemoryLog");
+		inject($assem, "MemoryAndCallHook", "CallHook");
+		inject($assem, "MemoryAndCallHook", "ReturnHook");
 		endfile($file);
 	};
 	end("结束脚本处理");
