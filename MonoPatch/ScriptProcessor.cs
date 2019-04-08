@@ -72,7 +72,7 @@ namespace MonoPatch
             s_OutputPath = outputPath;
             s_UseSymbols = useSymbols;
             
-            s_Calculator.Load(scpFile);
+            s_Calculator.LoadDsl(scpFile);
             s_Calculator.Calc("main");
         }
         public static IList<string> GetFileList()
