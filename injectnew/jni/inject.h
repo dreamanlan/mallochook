@@ -22,7 +22,7 @@ void libinject_log(const char* log_tag);
 pid_t libinject_find_pid_of(const char* process);
 
 // Load library in process pid, returns 0 on success
-int libinject_inject(pid_t pid, const char* library);
+int libinject_inject(pid_t pid, const char* library, const char *function_name, void *param, size_t param_size);
 
 
 #endif

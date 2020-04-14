@@ -66,6 +66,7 @@ void libinject_log(const char* log_tag) {
 
 pid_t _pid;
 void *_dlopen;
+void *_dlsym;
 void *_dlerror;
 void *_calloc;
 void *_free;
@@ -476,10 +477,29 @@ static uintptr_t remote_dlopen(const char *libname) {
     return plib;
 }
 
+// remote dlsym.
+static uintptr_t remote_dlsym(void* handle, const char *funcname) {
+    uintptr_t pmem = remote_string(funcname);
+
+    uintptr_t ptr = remote_call(_dlsym, 2, handle, pmem);
+
+    remote_free(pmem);
+
+    return ptr;
+}
+
 // Get remote dlerror
 static void remote_dlerror(char* error, int size) {
     uintptr_t e = remote_call(_dlerror, 0);
     remote_read("dlerror", e, (unsigned char*)error, size - 1);
+}
+
+// remote call hook.
+static uintptr_t remote_hook(void* addr, void *param, size_t param_size) {
+    uintptr_t pmem = remote_calloc(param_size, 1);
+    remote_write("param", pmem, (unsigned char *)param, param_size);    
+    uintptr_t r = remote_call(addr, 1, pmem);
+    return r;
 }
 
 // Find pid for process
@@ -523,7 +543,7 @@ pid_t libinject_find_pid_of(const char* process) {
 }
 
 // Load library in process pid, returns 0 on success
-int libinject_inject(pid_t pid, const char* library) {
+int libinject_inject(pid_t pid, const char* library, const char *function_name, void *param, size_t param_size) {
     remote_stop_ptr = remote_stop;
 
     int ret = 1;
@@ -558,18 +578,31 @@ int libinject_inject(pid_t pid, const char* library) {
         if ((findLibrary( libdl, -1 ) != 0) && (findLibrary( libdl, _pid ) != 0)) {
             void* handle = dlopen( libdl, RTLD_LAZY );
             _dlopen = remote_findFunction( libdl, dlsym( handle, "dlopen" ) );
+            _dlsym = remote_findFunction( libdl, dlsym( handle, "dlsym" ) );
             _dlerror = remote_findFunction( libdl, dlsym( handle, "dlerror" ) );
             dlclose( handle );
         } else {
             _dlopen = remote_findFunction( linker, (void *) dlopen );
+            _dlsym = remote_findFunction( linker, (void *)dlsym );
             _dlerror = remote_findFunction( linker, (void *) dlerror );
         }
 
-        INJECTLOG( "calloc:%p free:%p dlopen:%p dlerror:%p", (void*)_calloc, (void*)_free, (void*)_dlopen, (void*)_dlerror );
+        INJECTLOG( "calloc:%p free:%p dlopen:%p dslsym:%p dlerror:%p", (void*)_calloc, (void*)_free, (void*)_dlopen, (void*)_dlsym, (void*)_dlerror );
 
         // once we have the addresses, we can proceed to inject
-        if ( remote_dlopen(library) != 0 ) {
-            ret = 0;
+        uintptr_t addr = remote_dlopen(library);
+        if ( addr != 0 ) {
+            ret = 0;            
+            INJECTLOG( "module:%s addr:%p", library, (void*)addr );
+            
+            uintptr_t func = remote_dlsym((void*)addr, function_name);
+            if(func!=0){
+                INJECTLOG( "module:%s func:%s addr:%p", library, function_name, (void*)func );
+                
+                uintptr_t ret = remote_hook((void*)func, param, param_size);
+                
+                INJECTLOG( "module:%s func:%s ret:%d", library, function_name, (int)ret );
+            }
         } else {
             char error[1024] = { 0 };
             remote_dlerror(error, 1024);

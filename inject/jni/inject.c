@@ -498,6 +498,8 @@ int main(int argc, char** argv) {
 			puts("\tinject -name com.xxx.xxx -so xxx.so");
 			puts("\tinject -pid process_id -so xxx.so -func xxx");
 			puts("\tinject -name com.xxx.xxx -so xxx.so -func xxx");
+			puts("\tinject -pid process_id -so xxx.so -func xxx -argstr 256");
+			puts("\tinject -name com.xxx.xxx -so xxx.so -func xxx -argstr 256");
 			return -1;
 		}
 	}
