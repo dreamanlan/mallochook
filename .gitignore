@@ -72,9 +72,13 @@ hook/obj
 hook/libs
 inject/obj
 inject/libs
+injectnew/obj
+injectnew/libs
 xHook-1.1.9/libbiz/obj
 xHook-1.1.9/libbiz/libs
 xHook-1.1.9/libxhook/obj
 xHook-1.1.9/libxhook/libs
 xHook-1.1.9/xhookwrapper/biz/libs
 xHook-1.1.9/xhookwrapper/xhook/libs
+XposedLoader/build
+XposedLoader/libs

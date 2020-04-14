@@ -38,7 +38,8 @@
 #define REMOTE_ADDR( addr, local_base, remote_base ) ( (uint32_t)(addr) + (uint32_t)(remote_base) - (uint32_t)(local_base) )
 
 const char *libc_path = "/system/lib/libc.so";
-const char *linker_path = "/system/bin/linker";
+//const char *linker_path = "/system/bin/linker";//android 7.1.2以前使用这句，否则用下一句
+const char *linker_path = "/system/lib/libdl.so";//android 7.1.2以上版本dlopen等函数移至libdl.so
 
 
 #if ENABLE_DEBUG
@@ -406,7 +407,7 @@ int inject_remote_process( pid_t target_pid, const char *library_path, const cha
 	dlerror_addr = get_remote_addr( target_pid, linker_path, (void *)dlerror );	
 	puts_addr = get_remote_addr( target_pid, libc_path, (void *)puts );
 
-	DEBUG_PRINT( "[+] Get imports: dlopen: %x, dlsym: %x, dlclose: %x, dlerror: %x, puts: %x\n", dlopen_addr, dlsym_addr, dlclose_addr, puts_addr );
+	DEBUG_PRINT( "[+] Get imports: dlopen: %x, dlsym: %x, dlclose: %x, dlerror: %x, puts: %x\n", dlopen_addr, dlsym_addr, dlclose_addr, dlerror_addr, puts_addr );
 
 	remote_code_ptr = map_base + 0x3C00;
 	local_code_ptr = (uint8_t *)&_inject_start_s;

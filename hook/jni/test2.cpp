@@ -9,9 +9,9 @@ void testnew(void)
 {
 	printf("test2 testnew\n");
 	char* p = new char[1024];
-	p[0]='a';
+	p[0]='-';
 	p[1]=0;
-	printf("%s\n",p);
+	printf("%s",p);
 	delete[] p;
 }
 
@@ -20,9 +20,9 @@ void testmalloc(void)
 	printf("test2 testmalloc\n");
 	void* p = malloc(2048);
 	char* pp=(char*)p;
-	pp[0]='b';
+	pp[0]='-';
 	pp[1]=0;
-	printf("%s\n",pp);
+	printf("%s",pp);
 	free(p);
 }
 

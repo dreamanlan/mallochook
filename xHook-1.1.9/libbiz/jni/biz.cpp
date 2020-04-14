@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <unwind.h>
+#include <jni.h>
 #include <dlfcn.h>
 #include <pthread.h>
 //#include <jni.h>
@@ -83,18 +84,18 @@ static int hook()
 {
 	int r1 = xhook_register("^/data/.*\\.so$", "malloc", (void*)my_malloc, (void**)&old_malloc_ptr);
 	if(r1){
-		__android_log_print(ANDROID_LOG_INFO, "mymalloc", "register malloc hook failed:%d !", r1);
+		__android_log_print(ANDROID_LOG_INFO, "inject", "register malloc hook failed:%d !", r1);
 	}
 	int r2 = xhook_register("^/data/.*\\.so$", "free", (void*)my_free, (void**)&old_free_ptr);
 	if(r2){
-		__android_log_print(ANDROID_LOG_INFO, "mymalloc", "register free hook failed:%d !", r2);
+		__android_log_print(ANDROID_LOG_INFO, "inject", "register free hook failed:%d !", r2);
 	}
 	int r3 = xhook_refresh(1);
 	if(r3){
-		__android_log_print(ANDROID_LOG_INFO, "mymalloc", "malloc/free hook failed:%d !", r3);
+		__android_log_print(ANDROID_LOG_INFO, "inject", "malloc/free hook failed:%d !", r3);
 	}
 	if(!r1 && !r2 && !r3){
-		__android_log_print(ANDROID_LOG_INFO, "mymalloc", "malloc/free hook finish.");
+		__android_log_print(ANDROID_LOG_INFO, "inject", "malloc/free hook finish.");
 	}
 	return 0;
 }
@@ -172,14 +173,30 @@ extern "C" {
 		if(p && p[0]){
 			min_log_size = (uint32_t)atoi(p);
 		}
+		__android_log_print(ANDROID_LOG_INFO, "inject", "InstallHook\n");
 		printf("InstallHook\n");
 		pthread_mutexattr_init(&g_MutexAttr);
-    pthread_mutexattr_settype(&g_MutexAttr, PTHREAD_MUTEX_RECURSIVE);
+        pthread_mutexattr_settype(&g_MutexAttr, PTHREAD_MUTEX_RECURSIVE);
 		pthread_mutex_init(&g_Mutex, &g_MutexAttr);
 		pthread_mutex_init(&g_ReEntryMutex, &g_MutexAttr);
 		hook();
+		__android_log_print(ANDROID_LOG_INFO, "inject", "InstallHook finish.\n");
 		printf("InstallHook finish.\n");
 		g_CanLog = true;
 		return 0;
 	}
+}
+
+JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {
+    __android_log_print(ANDROID_LOG_INFO, "inject", "JNI_OnLoad enter");
+
+    JNIEnv *env = NULL;
+    if (vm->GetEnv((void **) &env, JNI_VERSION_1_6) == JNI_OK) {
+        __android_log_print(ANDROID_LOG_INFO, "inject", "GetEnv OK");
+
+        InstallHook("256");
+
+        __android_log_print(ANDROID_LOG_INFO, "inject", "JNI_OnLoad leave");
+        return JNI_VERSION_1_6;
+    }
 }

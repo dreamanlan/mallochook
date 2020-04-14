@@ -149,9 +149,9 @@ static int local_uninstall_hook(void)
 void testnew(void)
 {
 	char* p = new char[10240];
-	p[0]='a';
+	p[0]='-';
 	p[1]=0;
-	printf("%s\n",p);
+	printf("%s",p);
 	delete[] p;
 }
 
@@ -159,9 +159,9 @@ void testmalloc(void)
 {
 	void* p = malloc(20480);
 	char* pp=(char*)p;
-	pp[0]='b';
+	pp[0]='-';
 	pp[1]=0;
-	printf("%s\n",pp);
+	printf("%s",pp);
 	free(p);
 }
 
