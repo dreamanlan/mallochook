@@ -45,14 +45,20 @@ namespace
 	{
 		for (size_t idx = 0; idx < count; ++idx) {
 			const void* addr = buffer[idx];
+			const void* raddr = 0;
 			const char* symbol = "";
+			const char* file = "";
 
 			Dl_info info;
-			if (dladdr(addr, &info) && info.dli_sname) {
-				symbol = info.dli_sname;
+			if (dladdr(addr, &info)) {
+				raddr = (const void*)((const char*)addr - (const char*)info.dli_fbase);
+				if(info.dli_sname)
+				    symbol = info.dli_sname;
+				if(info.dli_fname)
+				    file = info.dli_fname;
 			}
 
-			__android_log_print(ANDROID_LOG_INFO, title, "%s #%d:%p %s", prefix, idx, addr, symbol);
+			__android_log_print(ANDROID_LOG_INFO, title, "%s #%d:%p %p %s|%s", prefix, idx, addr, raddr, symbol, file);
 		}
 	}
 
