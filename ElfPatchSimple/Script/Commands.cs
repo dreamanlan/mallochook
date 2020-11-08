@@ -8,38 +8,38 @@ namespace Calculator
     //---------------------------------------------------------------------------------------------------------------
     internal class BeginCommand : SimpleExpressionBase
     {
-        protected override object OnCalc(IList<object> operands)
+        protected override CalculatorValue OnCalc(IList<CalculatorValue> operands)
         {
-            string info = operands[0] as string;
+            string info = operands[0].AsString;
             ScriptProcessor.Begin(info);
             return 0;
         }
     }
     internal class EndCommand : SimpleExpressionBase
     {
-        protected override object OnCalc(IList<object> operands)
+        protected override CalculatorValue OnCalc(IList<CalculatorValue> operands)
         {
-            string info = operands[0] as string;
+            string info = operands[0].AsString;
             ScriptProcessor.End(info);
             return 0;
         }
     }
     internal class BeginFileCommand : SimpleExpressionBase
     {
-        protected override object OnCalc(IList<object> operands)
+        protected override CalculatorValue OnCalc(IList<CalculatorValue> operands)
         {
-            string file = operands[0] as string;
-            string info = operands[1] as string;
+            string file = operands[0].AsString;
+            string info = operands[1].AsString;
             ScriptProcessor.BeginFile(file, info);
             return 0;
         }
     }
     internal class AddInitArrayCallCommand : SimpleExpressionBase
     {
-        protected override object OnCalc(IList<object> operands)
+        protected override CalculatorValue OnCalc(IList<CalculatorValue> operands)
         {
             if (operands.Count > 0) {
-                uint entry = (uint)Convert.ChangeType(operands[0], typeof(uint));
+                uint entry = operands[0].Get<uint>();
                 ScriptProcessor.AddInitArrayCall(entry);
             }
             return 0;
@@ -47,11 +47,11 @@ namespace Calculator
     }
     internal class EndFileCommand : SimpleExpressionBase
     {
-        protected override object OnCalc(IList<object> operands)
+        protected override CalculatorValue OnCalc(IList<CalculatorValue> operands)
         {
             if (operands.Count > 1) {
-                string file = operands[0] as string;
-                uint size = (uint)Convert.ChangeType(operands[1], typeof(uint));
+                string file = operands[0].AsString;
+                uint size = operands[1].Get<uint>();
                 ScriptProcessor.EndFile(file, size);
             }
             return 0;
@@ -59,21 +59,23 @@ namespace Calculator
     }
     internal class GetFileListCommand : SimpleExpressionBase
     {
-        protected override object OnCalc(IList<object> operands)
+        protected override CalculatorValue OnCalc(IList<CalculatorValue> operands)
         {
-            return ScriptProcessor.GetFileList();
+            return CalculatorValue.FromObject(ScriptProcessor.GetFileList());
         }
     }
     //---------------------------------------------------------------------------------------------------------------
     internal class LogCommand : SimpleExpressionBase
     {
-        protected override object OnCalc(IList<object> operands)
+        protected override CalculatorValue OnCalc(IList<CalculatorValue> operands)
         {
             if (operands.Count > 0) {
-                string format = operands[0] as string;
+                string format = operands[0].AsString;
                 List<object> vargs = new List<object>();
-                vargs.AddRange(operands);
-                vargs.RemoveAt(0);
+                for(int i = 1; i < operands.Count; ++i) {
+                    var opd = operands[i].Get<object>();
+                    vargs.Add(opd);
+                }
                 ScriptProcessor.ErrorTxts.Add(string.Format(format, vargs.ToArray()));
             }
             return 0;
