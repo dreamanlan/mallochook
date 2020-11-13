@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using ElfPatch;
 
-namespace Calculator
+namespace DslExpression
 {
     //---------------------------------------------------------------------------------------------------------------
     internal class BeginCommand : SimpleExpressionBase
